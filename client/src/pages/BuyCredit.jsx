@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { assets } from "../assets/assets";
+import { assets, plans } from "../assets/assets";
 import { AppContext } from '../context/AppContext'
 import { motion } from "motion/react"
 import { useNavigate } from 'react-router-dom';
@@ -35,6 +35,10 @@ const BuyCredit = () => {
         
       }
     }
+    if (!window.Razorpay) {
+    toast.error("Razorpay SDK failed to load");
+    return;
+}
 
     const rzp = new window.Razorpay(options)
     rzp.open()

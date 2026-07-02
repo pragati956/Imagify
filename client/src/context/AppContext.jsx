@@ -14,6 +14,41 @@ const AppContextProvider = (props)=>{
      const [credit,setCredit]=useState(false)
      const backendUrl=import.meta.env.VITE_BACKEND_URL
      const navigate= useNavigate()
+     const enhancePrompt = async (prompt) => {
+
+  try {
+
+    const { data } = await axios.post(
+
+      backendUrl + "/api/image/enhance-prompt",
+
+      { prompt },
+
+      {
+        headers: { token }
+      }
+
+    );
+
+    if(data.success){
+
+      return data.enhancedPrompt;
+
+    }
+
+    return "";
+
+  }
+
+  catch(error){
+
+    console.log(error);
+
+    return "";
+
+  }
+
+}
      
      const loadCredits=async ()=>{
       try{
@@ -31,11 +66,14 @@ const AppContextProvider = (props)=>{
      const generateImage=async(prompt)=>{
       try{
        const {data}=await axios.post(backendUrl + '/api/image/generate-image',{prompt},{headers: {token}})
-       if(data.success){
-         loadCredits()
-        return data.resultImage;
+       if (data.success) {
+  loadCredits();
 
-       }
+  return {
+    image: data.resultImage,
+    originalPrompt: data.originalPrompt,
+  };
+}
        else{
          toast.error(data.message)
          loadCredits()
@@ -63,7 +101,7 @@ const AppContextProvider = (props)=>{
       }
      },[token])
      const value={
-        user,setUser,showLogin,setShowLogin,backendUrl,token,setToken,credit,setCredit,loadCredits,logout,generateImage
+        user,setUser,showLogin,setShowLogin,backendUrl,token,setToken,credit,setCredit,loadCredits,logout,generateImage,enhancePrompt
      }
      return (
         <AppContext.Provider
