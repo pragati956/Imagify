@@ -1,8 +1,8 @@
 import React from 'react'
-import { assets } from "../assets/assets";
+import { assets } from "../../assets/assets";
 import { motion } from "motion/react"
 import { useContext } from "react";
-import { AppContext } from "../context/AppContext";
+import { AppContext } from "../../context/AppContext";
 import { useNavigate } from "react-router-dom";
 
 

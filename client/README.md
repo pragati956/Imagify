@@ -1,16 +1,117 @@
-# React + Vite
+# 🎨 Imagify — AI Text to Image Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Imagify is a full-stack **MERN-based AI image generation platform** that converts text prompts into images using AI.  
+It features **secure authentication**, a **credit-based usage system**, and **Razorpay-powered payments** for purchasing credits.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+- 🔐 User authentication with JWT
+- 🖼️ AI-powered text-to-image generation
+- 💳 Credit-based image generation system
+- 💰 Razorpay integration (test mode) for purchasing credits
+- ✅ Secure payment verification
+- 📊 Real-time credit balance updates
+- 📱 Fully responsive UI
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Frontend
+- React
+- Tailwind CSS
+- Framer Motion
+- Axios
+
+### Backend
+- Node.js
+- Express.js
+- MongoDB Atlas
+- Mongoose
+- JWT Authentication
+- Razorpay (Test Mode)
+
+### Tools
+- Postman (API testing)
+- Git & GitHub
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/pragati956/imagify.git
+cd imagify
+2️⃣ Backend Setup
+cd server
+npm install
+
+Create a .env file inside server:
+
+PORT=4000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+RAZORPAY_KEY_ID=rzp_test_xxxxx
+RAZORPAY_KEY_SECRET=xxxxxxxx
+
+Run backend:
+
+npm run dev
+3️⃣ Frontend Setup
+cd client
+npm install
+
+Create a .env file inside client:
+
+VITE_BACKEND_URL=http://localhost:4000
+VITE_RAZORPAY_KEY_ID=rzp_test_xxxxx
+
+Run frontend:
+
+npm run dev
+💳 Razorpay Test Payment Details
+Use these test credentials only:
+
+UPI
+success@razorpay
+Card
+Card Number: 4111 1111 1111 1111
+Expiry: Any future date
+CVV: Any 3 digits
+OTP: 123456
+📂 Project Structure
+imagify/
+│
+├── client/        # React frontend
+│
+├── server/        # Node.js backend
+│   ├── controllers
+│   ├── routes
+│   ├── models
+│   ├── middleware
+│
+└── README.md
+
+🔒 Security Notes
+Razorpay is used in test mode only
+API keys are stored securely using environment variables
+.env files are excluded from version control
+🌱 Future Improvements
+Image generation history
+Prompt templates & style presets
+Transaction history page
+Razorpay webhooks
+Admin dashboard
+
+👩‍💻 Author
+Pragati Singh
+MCA first year| MNNIT
+📍 Prayagraj, India
+
+⭐ Acknowledgements
+Razorpay Documentation
+MongoDB Atlas
+Open-source community

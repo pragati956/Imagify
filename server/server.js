@@ -4,7 +4,7 @@ import 'dotenv/config'
 import userRouter from './routes/userRoutes.js'
 
 import connectDB from './config/mongodb.js'
-import imageRouter from './routes/imageRouter.js'
+import imageRouter from './routes/imageRoutes.js'
 const app = express()
 const PORT = process.env.PORT || 4000
 
