@@ -1,7 +1,7 @@
 import express from "express";
 import {
   enhancePrompt,
-  generateImage,
+  generateImage, getUserCreations, deleteCreation,
 } from "../controllers/imageController.js";
 
 import userAuth from "../middleware/auth.js";
@@ -21,5 +21,8 @@ imageRouter.post(
   userAuth,
   generateImage
 );
+
+imageRouter.get('/creations', userAuth, getUserCreations); // New
+imageRouter.delete('/creations/:imageId', userAuth, deleteCreation); // New
 
 export default imageRouter;
