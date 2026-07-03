@@ -1,6 +1,6 @@
-import React, { useState, useContext,useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { assets } from "../assets/assets";
-import { motion } from "motion/react";
+import { motion as Motion } from "motion/react";
 import { AppContext } from '../context/AppContext'
 
 
@@ -14,27 +14,21 @@ const Result = () => {
 const [enhancedPrompt, setEnhancedPrompt] = useState("")
   const { generateImage,enhancePrompt } = useContext(AppContext)
   useEffect(() => {
-
-if (!input || input.trim().length < 5) {
-          setEnhancedPrompt("");
-        return;
+    if (!input || input.trim().length < 5) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEnhancedPrompt("");
+      return;
     }
 
     const timer = setTimeout(async () => {
-       setOptimizing(true);
-
-        const prompt = await enhancePrompt(input);
-
-        if (prompt) {
-            setEnhancedPrompt(prompt);
-        }
-           setOptimizing(false);
-
+      setOptimizing(true);
+      const prompt = await enhancePrompt(input);
+      if (prompt) setEnhancedPrompt(prompt);
+      setOptimizing(false);
     }, 700);
 
     return () => clearTimeout(timer);
-
-}, [input]);
+  }, [input, enhancePrompt]);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault()
@@ -59,7 +53,7 @@ if (result) {
   }
 
   return (
-    <motion.form
+    <Motion.form
       initial={{ opacity: 0.2, y: 100 }}
       transition={{ duration: 1 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -187,7 +181,7 @@ setImage(assets.sample_img_1);
           </a>
         </div>
       )}
-    </motion.form>
+    </Motion.form>
   )
 }
 

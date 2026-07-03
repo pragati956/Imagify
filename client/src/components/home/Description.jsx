@@ -1,11 +1,11 @@
 import React from "react";
 import { assets } from "../../assets/assets";
-import { motion } from "motion/react"
+import { motion as Motion } from "motion/react"
 
 
 const Description = () => {
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0.2, y: 100 }}
       transition={{ duration: 1 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -42,7 +42,7 @@ const Description = () => {
           </p>
         </div>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 };
 

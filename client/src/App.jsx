@@ -3,7 +3,8 @@ import React, { useContext } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { AppContext } from './context/AppContext'
 import { ToastContainer } from 'react-toastify';
-
+// Add this import
+import MyCreations from './pages/MyCreations'
 
 
 import Home from './pages/Home'
@@ -28,6 +29,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/result" element={<Result />} />
         <Route path="/buy" element={<BuyCredit />} />
+        <Route path="/creations" element={<MyCreations />} />
     </Routes>
 </main>
 

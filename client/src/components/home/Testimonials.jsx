@@ -1,11 +1,11 @@
 import React from 'react'
 import { assets, testimonialsData } from "../../assets/assets";
-import { motion } from "motion/react"
+import { motion as Motion } from "motion/react"
 
 
 const Testimonials = () => {
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0.2, y: 100 }}
       transition={{ duration: 1 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -46,7 +46,7 @@ const Testimonials = () => {
           </div>
         ))}
       </div>
-    </motion.div>
+    </Motion.div>
   )
 }
 

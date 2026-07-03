@@ -1,4 +1,5 @@
-import { createContext, useState, useEffect } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
@@ -50,19 +51,19 @@ const AppContextProvider = (props)=>{
 
 }
      
-     const loadCredits=async ()=>{
-      try{
-         const {data}=await axios.get(backendUrl + '/api/user/credits', {headers:{token}})
-         if(data.success){
+     const loadCredits = useCallback(async () => {
+      try {
+         const { data } = await axios.get(backendUrl + '/api/user/credits', { headers: { token } })
+         if (data.success) {
             setCredit(data.credits)
             setUser(data.user)
          }
       }
-      catch(error){
+      catch (error) {
          console.log(error)
          toast.error(error.message)
       }
-     }
+     }, [backendUrl, token]);
      const generateImage=async(prompt)=>{
       try{
        const {data}=await axios.post(backendUrl + '/api/image/generate-image',{prompt},{headers: {token}})
@@ -95,11 +96,11 @@ const AppContextProvider = (props)=>{
       setToken('')
       setUser(null)
      }
-     useEffect( ()=>{
-      if(token){
-         loadCredits()
-      }
-     },[token])
+     useEffect(() => {
+      if (!token) return;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadCredits();
+     }, [token, loadCredits]);
      const value={
         user,setUser,showLogin,setShowLogin,backendUrl,token,setToken,credit,setCredit,loadCredits,logout,generateImage,enhancePrompt
      }
