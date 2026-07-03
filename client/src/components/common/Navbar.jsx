@@ -49,6 +49,9 @@ const Navbar = () => {
 
               <div className="absolute right-0 top-10 hidden group-hover:block z-20">
                 <ul className="bg-white border rounded-md text-sm shadow-md">
+                  <li onClick={() => navigate('/creations')} className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b">
+                    My Creations
+                  </li>
                   <li onClick={logout} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     Logout
                   </li>
