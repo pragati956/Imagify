@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { assets, plans } from "../assets/assets";
 import { AppContext } from '../context/AppContext'
-import { motion } from "motion/react"
+import { motion as Motion } from "motion/react"
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -67,7 +67,7 @@ const BuyCredit = () => {
   }
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0.2, y: 100 }}
       transition={{ duration: 1 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -108,7 +108,7 @@ const BuyCredit = () => {
         ))}
       </div>
 
-    </motion.div>
+    </Motion.div>
   )
 }
 
