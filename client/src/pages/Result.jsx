@@ -2,6 +2,12 @@ import React, { useState, useContext, useEffect } from 'react'
 import { assets } from "../assets/assets";
 import { motion as Motion } from "motion/react";
 import { AppContext } from '../context/AppContext'
+import { toast } from "react-toastify";
+import {
+Copy,
+Sparkles,
+RotateCcw
+} from "lucide-react";
 
 
 const Result = () => {
@@ -23,18 +29,37 @@ const [enhancedPrompt, setEnhancedPrompt] = useState("")
     const timer = setTimeout(async () => {
       setOptimizing(true);
       const prompt = await enhancePrompt(input);
-      if (prompt) setEnhancedPrompt(prompt);
-      setOptimizing(false);
+if (prompt) {
+    setEnhancedPrompt(prompt);
+    setOriginalPrompt(input);
+}      setOptimizing(false);
     }, 700);
 
     return () => clearTimeout(timer);
   }, [input, enhancePrompt]);
+  const copyPrompt = async () => {
+  try {
+    await navigator.clipboard.writeText(enhancedPrompt);
+
+    toast.success("Prompt copied to clipboard!");
+
+  } catch (error) {
+
+    toast.error("Failed to copy prompt.");
+
+  }
+};
 
   const onSubmitHandler = async (e) => {
     e.preventDefault()
     setLoading(true)
 
-    if (input) {
+  if (input || enhancedPrompt)  {
+    if (!enhancedPrompt.trim()) {
+    toast.error("Prompt cannot be empty");
+    setLoading(false);
+    return;
+}
       
 const result = await generateImage(
 
@@ -44,6 +69,7 @@ enhancedPrompt || input
 if (result) {
   setImage(result.image);
   setOriginalPrompt(result.originalPrompt);
+  setEnhancedPrompt(result.enhancedPrompt); // ✅ Add this
 
   setImageLoaded(true);
   setInput("");
@@ -89,23 +115,54 @@ if (result) {
 
     {/* Loading */}
    {loading && (
-  <p className="mt-4 text-blue-600 font-medium animate-pulse">
-    🎨 AI is generating your image...
-  </p>
+<div className="mt-5 bg-blue-50 border border-blue-200 rounded-lg px-5 py-4">
+
+<p className="text-blue-700 animate-pulse">
+
+🎨 AI is generating your masterpiece...
+
+</p>
+
+</div>
 )}
 
   </div>
   {optimizing && (
-  <p className="mt-4 text-blue-600 font-medium animate-pulse">
-    ✨ AI is optimizing your prompt...
-  </p>
-)}
-{!isImageLoaded && enhancedPrompt && (
-  <div className="mt-4 max-w-xl w-full bg-blue-50 border border-blue-200 rounded-xl p-5 shadow-sm">    <h3 className="font-semibold text-lg text-blue-600">
-      AI Optimized Prompt
-    </h3>
+ <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
 
+<p className="animate-pulse text-blue-700">
+
+✨ Optimizing prompt...
+
+</p>
+
+</div>
+)}
+{enhancedPrompt && !loading && (
+    <div className="mt-4 max-w-xl w-full bg-blue-50 border border-blue-200 rounded-xl p-5 shadow-sm">   
+ <div className="flex justify-between items-start">
+
+    <div>
+
+        <h3 className="font-semibold text-lg text-blue-600">
+            ✨ AI Prompt Assistant
+        </h3>
+
+        <p className="text-sm text-gray-500 mt-1">
+            AI has improved your prompt. You can edit it before generating the image.
+        </p>
+
+    </div>
+
+   
+
+</div>
+
+   
    <textarea
+disabled={loading || optimizing}
+   
+   
 
 value={enhancedPrompt}
 
@@ -116,6 +173,7 @@ setEnhancedPrompt(e.target.value)
 }
 
 rows={5}
+  placeholder="Edit the AI optimized prompt..."
 
 className="
 
@@ -138,11 +196,81 @@ resize-none
 "
 
 ></textarea>
+<div className="flex gap-3 mt-4">
+
+ <button
+disabled={loading || optimizing}
+type="button"
+onClick={() => setEnhancedPrompt(originalPrompt)}
+className="
+flex-1
+flex
+items-center
+justify-center
+gap-2
+border
+border-gray-300
+rounded-lg
+py-3
+hover:bg-gray-100
+"
+>
+
+<RotateCcw size={18}/>
+
+Restore Original
+</button>
+
+   <button
+disabled={loading || optimizing}
+type="button"
+onClick={copyPrompt}
+className="
+flex-1
+flex
+items-center
+justify-center
+gap-2
+bg-gray-200
+rounded-lg
+py-3
+hover:bg-gray-300
+"
+>
+
+<Copy size={18}/>
+
+Copy Prompt
+</button>
+
+  <button
+type="submit"
+disabled={loading || optimizing}
+className="
+flex-1
+flex
+items-center
+justify-center
+gap-2
+bg-blue-600
+hover:bg-blue-700
+text-white
+rounded-lg
+py-3
+"
+>
+
+<Sparkles size={18}/>
+
+Generate Image
+</button>
+
+</div>
   </div>
 )}
 
 
-      {!isImageLoaded && (
+     {!isImageLoaded && !enhancedPrompt && (
         <div className='flex w-full max-w-xl bg-neutral-500 text-white text-sm p-0.5 mt-10 rounded-full'>
           <input
             onChange={e => setInput(e.target.value)}
@@ -170,6 +298,7 @@ className="bg-zinc-900 hover:bg-black transition-all px-10 sm:px-16 py-3 rounded
   setOriginalPrompt("");
   setEnhancedPrompt("");
   setLoading(false);
+  setOptimizing(false);
 setImage(assets.sample_img_1);
 }}  // ✅ FIX
             className='bg-transparent border border-zinc-900 text-black px-8 py-3 rounded-full cursor-pointer'
