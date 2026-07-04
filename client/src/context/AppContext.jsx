@@ -91,10 +91,11 @@ const AppContextProvider = (props)=>{
          return null;
       }
      }
-     const logout =()=>{
+     const logout = () => {
       localStorage.removeItem('token');
-      setToken('')
-      setUser(null)
+      setToken('');
+      setUser(null);
+      navigate('/'); // Added this line to redirect to home upon logout
      }
      useEffect(() => {
       if (!token) return;
