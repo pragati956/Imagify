@@ -20,14 +20,23 @@ const GenerateBtn = () => {
     }
     return (
         <Motion.div
-         initial ={{opacity:0.2, y:100}}
-        transition={{duration:1}}
+initial={{
+opacity:0,
+y:60
+}}        transition={{duration:1}}
         whileInView={{opacity :1, y:0}}
-        viewport={{once :true}} className='pb-16 text-center'>
-            <h1 className='text-2xl md:text-3xl lg:text-4xl mt-4 font-semibold text-neutral-800 py-6 md:py-16'>See the magic. Try now</h1>
-            <button onClick={onClickHandler} className='inline-flex items-center gap-2 px-12 py-13 rounded-full bg-black text-white m-auto hover:scale-105 transition-all duration-500'>
+        viewport={{once :true}} className='py-20
+px-6 text-center'>
+            <p className="text-gray-500 max-w-xl mx-auto mb-8">
+Transform your ideas into beautiful AI-generated artwork in seconds.</p>
+            <h1 className='text-3xl
+sm:text-4xl
+lg:text-5xl  font-semibold text-neutral-800 mb-8'>Create Stunning AI Images in Seconds</h1>
+            <button onClick={onClickHandler} className='inline-flex items-center gap-3 px-8
+sm:px-12 py-3 rounded-full bg-zinc-900
+hover:bg-black shadow-lg text-white m-auto hover:scale-105 transition-all duration-300'>
                 Generate Images
-                <img src={assets.star_group} alt="" className='h-6' />
+                <img src={assets.star_group} alt="AI Sparkle Icon" className='w-6 h-6' loading="lazy" />
             </button>
         </Motion.div>
     )
