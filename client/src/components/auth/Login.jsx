@@ -10,10 +10,12 @@ const Login = () => {
     const [state, setState] = useState('Login')
     const { setShowLogin, backendUrl, setToken, setUser } = useContext(AppContext)
     const [name, setName] = useState('')
+    const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const onSubmitHandler = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             if (state === 'Login') {
                 const { data } = await axios.post(backendUrl + '/api/user/login', { email, password })
@@ -47,6 +49,11 @@ const Login = () => {
             toast.error(error.message)
 
         }
+        finally {
+
+        setLoading(false);
+
+    }
     }
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -56,39 +63,94 @@ const Login = () => {
         }
     }, [])
     return (
-        <div className=' fixed top-0 left-0 right-0 bottom-0 z-10 backdrop-blur-sm bg-black/30 flex justify-center items-center'>
-
+<div
+className="fixed inset-0 z-10 backdrop-blur-sm bg-black/40 flex justify-center items-center"
+onClick={()=>setShowLogin(false)}
+>
             <Motion.form onSubmit={onSubmitHandler}
                 initial={{ opacity: 0.2, y: 50 }}
                 transition={{ duration: 0.3 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} className='relative bg-white p-10 rounded-xl text-slate-500' >
-                <h1 className='text-center text-2xl text-neutral-800 font-medium-semibold'>{state}</h1>
+                viewport={{ once: true }} className="
+relative
+bg-white
+w-[90%]
+max-w-md
+p-6
+sm:p-8
+rounded-2xl
+text-slate-500
+shadow-xl
+" >
+                <h1 className='text-center text-2xl text-neutral-800 font-semibold'>{state}</h1>
                 <p className='text-sm'>Welcome back! Please sign in to continue</p>
                 {state !== 'Login' && <div className='border px-6 py-2 flex items-center gap-2 rounded-full mt-5'>
 
                     <img src={assets.user_icon} alt="" />
 
-                    <input onChange={e => setName(e.target.value)} value={name} type="text" className='outline-none text-sm' placeholder="Full-Name" required />
+                    <input onChange={e => setName(e.target.value)} value={name} type="text" className="
+flex-1
+outline-none
+text-sm
+bg-transparent
+"
+placeholder="Full-Name" required />
                 </div>
                 }
                 <div className='border px-6 py-2 flex items-center gap-2 rounded-full mt-4'>
 
                     <img src={assets.email_icon} alt="" />
 
-                    <input onChange={e => setEmail(e.target.value)} value={email} type="email" className='outline-none text-sm' placeholder="Email-id" required />
+                    <input onChange={e => setEmail(e.target.value)} value={email} type="email" className="
+flex-1
+outline-none
+text-sm
+bg-transparent
+"
+placeholder="Email-id" required />
                 </div>
                 <div className='border px-6 py-2 flex items-center gap-2 rounded-full mt-4'>
 
                     <img src={assets.lock_icon} alt="" />
 
-                    <input onChange={e => setPassword(e.target.value)} value={password} type="password" className='outline-none text-sm' placeholder="Password" required />
+                    <input onChange={e => setPassword(e.target.value)} value={password} type="password" className="
+flex-1
+outline-none
+text-sm
+bg-transparent
+"
+placeholder="Password" required />
                 </div>
-                <p className='text-sm text-blue-600 my-4 cursor-pointer'>Forgot Password?</p>
 
-                <button className='bg-blue-600 w-full text-white py-2 rounded-full'>
-                    {state === 'Login' ? 'login' : 'create account'}
-                </button>
+               <button
+type="submit"
+disabled={loading}
+className="
+bg-blue-600
+hover:bg-blue-700
+disabled:bg-blue-400
+disabled:cursor-not-allowed
+transition-all
+duration-300
+w-full
+text-white
+py-2.5
+rounded-full
+font-medium
+"
+>
+{
+loading
+?
+"Please wait..."
+:
+state==="Login"
+?
+"Login"
+:
+"Create Account"
+}
+</button>
                 {state === 'Login' ? <p className='mt-5 text-center'>Don't have an account?
                     <span className='text-blue-600 cursor-pointer' onClick={() => setState('Sign Up')}>Sign up</span>
                 </p> :
@@ -96,7 +158,16 @@ const Login = () => {
                         <span className='text-blue-600 cursor-pointer' onClick={() => setState('Login')}>Login</span>
                     </p>}
 
-                <img onClick={() => setShowLogin(false)} src={assets.cross_icon} alt="" className='absolute top-5 right-5 cursor-pointer' />
+                <img onClick={() => setShowLogin(false)} src={assets.cross_icon} alt="" className="
+absolute
+top-4
+right-4
+w-5
+h-5
+cursor-pointer
+hover:scale-110
+transition
+" />
             </Motion.form>
 
         </div>
