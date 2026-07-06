@@ -25,7 +25,7 @@ opacity:0,
 y:60
 }}        transition={{duration:1}}
         whileInView={{opacity :1, y:0}}
-        viewport={{once :true}} className='py-20
+        viewport={{once :true}} className='py-16
 px-6 text-center'>
             <p className="text-gray-500 max-w-xl mx-auto mb-8">
 Transform your ideas into beautiful AI-generated artwork in seconds.</p>

@@ -14,7 +14,7 @@ y:60
 className="
 max-w-7xl
 mx-auto
-py-24
+py-16
 px-6
 flex
 flex-col

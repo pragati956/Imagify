@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { assets } from "../../assets/assets";
 const Footer = () => {
   return (
-    <footer className="border-t border-gray-200 mt-20">
+    <footer className="border-t border-gray-200 mt-4">
       <div className="
 max-w-7xl
 mx-auto
