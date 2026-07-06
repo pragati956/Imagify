@@ -1,83 +1,132 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { assets } from "../../assets/assets";
 import { Link, useNavigate } from "react-router-dom";
 import { AppContext } from "../../context/AppContext";
 
 const Navbar = () => {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const { user, setShowLogin, logout, credit } = useContext(AppContext);
   const navigate = useNavigate();
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target)
+    ) {
+      setOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   return (
-      
-<div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl shadow-sm border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/">
+        <Link
+          to="/"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        >
           <img
             src={assets.logo}
-            alt="logo"
-            className="w-28 sm:w-32 lg:w-40 cursor-pointer"
+            alt="Imagify Logo"
+            className="w-28 sm:w-32 lg:w-40 cursor-pointer hover:scale-105 transition-transform duration-300"
           />
         </Link>
 
-        {/* Right section */}
+        {/* Right Section */}
         {user ? (
           <div className="flex items-center gap-3 sm:gap-5">
-
-            {/* Credits button */}
+            {/* Credits */}
             <button
               onClick={() => navigate("/buy")}
               className="flex items-center gap-2 bg-blue-200 px-4 sm:px-6 py-1.5 sm:py-3 rounded-full hover:scale-105 transition duration-300"
             >
-              <img src={assets.credit_star} alt="credit" className="w-5" />
-              <p className="text-xs sm:text-sm font-medium text-gray-800">
-                Credits left : {credit}
+              <img
+                src={assets.credit_star}
+                alt="Credit Balance"
+                className="w-5"
+              />
+
+              <p className="hidden sm:block">
+                Credits: {credit || 0}
               </p>
+
+              <p className="sm:hidden">{credit || 0}</p>
             </button>
 
             {/* Username */}
-            <p className="text-gray-800 hidden sm:block">
-              Hi, {user.name}
+            <p className="hidden sm:block max-w-[120px] truncate">
+              Hi, {user?.name || "User"}
             </p>
 
-            {/* Profile dropdown */}
-            <div className="relative group">
+            {/* Profile Dropdown */}
+           <div
+  className="relative"
+  ref={dropdownRef}
+>
               <img
                 src={assets.profile_icon}
-                className="w-10 cursor-pointer drop-shadow"
-                alt="profile"
+                alt="Profile"
+                loading="lazy"
+                className="w-10 rounded-full cursor-pointer hover:scale-105 transition-all duration-300 drop-shadow"
+                onClick={() => setOpen(!open)}
               />
 
-              <div className="absolute right-0 top-10 hidden group-hover:block z-20">
-                <ul className="bg-white border rounded-md text-sm shadow-md">
-                  <li onClick={() => navigate('/creations')} className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b">
-                    My Creations
-                  </li>
-                  <li onClick={logout} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                    Logout
-                  </li>
-                </ul>
-              </div>
+              {open && (
+                <div className="absolute right-0 top-12 z-50">
+                  <ul className="w-44 bg-white border rounded-lg shadow-lg overflow-hidden">
+                    <li
+                      onClick={() => {
+                        navigate("/creations");
+                        setOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b"
+                    >
+                      My Creations
+                    </li>
+
+                    <li
+                      onClick={() => {
+                        logout();
+                        setOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      Logout
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         ) : (
           <div className="flex items-center gap-4 sm:gap-6">
-            <p
+            <button
+              type="button"
               onClick={() => navigate("/buy")}
-              className="cursor-pointer text-gray-700 hover:text-black"
+              className="font-medium text-gray-700 hover:text-blue-600 transition"
             >
               Pricing
-            </p>
+            </button>
 
             <button
               onClick={() => setShowLogin(true)}
-              className="bg-zinc-800 text-white px-7 py-2 sm:px-10 text-sm rounded-full hover:opacity-90"
+              className="bg-zinc-800 text-white px-7 py-2 sm:px-10 text-sm rounded-full hover:scale-105 transition-all duration-300 shadow-md active:scale-95"
             >
               Login
             </button>
           </div>
         )}
       </div>
-    
+    </header>
   );
 };
 
