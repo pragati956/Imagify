@@ -9,7 +9,7 @@ const Description = () => {
       initial={{ opacity: 0.2, y: 100 }}
       transition={{ duration: 1 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }} className="flex flex-col items-center justify-center my-24 p-6 md:px-28">
+      viewport={{ once: true }} className="flex flex-col items-center justify-center py-16 p-6 md:px-28">
         <span className="
 text-blue-600
 font-semibold

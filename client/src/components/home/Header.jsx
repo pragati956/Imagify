@@ -27,7 +27,7 @@ const Header = () => {
     justify-center
     items-center
     text-center
-    py-20
+    py-16
     px-6"
     initial={{
 opacity:0,

@@ -67,11 +67,14 @@ const Login = () => {
 className="fixed inset-0 z-10 backdrop-blur-sm bg-black/40 flex justify-center items-center"
 onClick={()=>setShowLogin(false)}
 >
-            <Motion.form onSubmit={onSubmitHandler}
-                initial={{ opacity: 0.2, y: 50 }}
-                transition={{ duration: 0.3 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} className="
+      <Motion.form
+    onClick={(e) => e.stopPropagation()}
+    onSubmit={onSubmitHandler}
+    initial={{ opacity: 0.2, y: 50 }}
+    transition={{ duration: 0.3 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    className="
 relative
 bg-white
 w-[90%]
@@ -81,7 +84,8 @@ sm:p-8
 rounded-2xl
 text-slate-500
 shadow-xl
-" >
+"
+>
                 <h1 className='text-center text-2xl text-neutral-800 font-semibold'>{state}</h1>
                 <p className='text-sm'>Welcome back! Please sign in to continue</p>
                 {state !== 'Login' && <div className='border px-6 py-2 flex items-center gap-2 rounded-full mt-5'>

@@ -12,6 +12,7 @@ const Home = () => {
       <Steps />
       <Description />
       <Testimonials />
+      <GenerateBtn />
     </div>
   );
 };
