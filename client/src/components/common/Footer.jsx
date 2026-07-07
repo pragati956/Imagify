@@ -23,6 +23,7 @@ gap-5
   to="/"
   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
 >
+  <div className="dark:bg-white dark:px-3 dark:py-1.5 dark:rounded-xl transition-all">
   <img
     src={assets.logo}
     alt="Imagify Logo"
@@ -35,6 +36,7 @@ gap-5
       cursor-pointer
     "
   />
+  </div>
 </Link>
         <p className="
 flex-1

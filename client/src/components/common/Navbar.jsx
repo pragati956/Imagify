@@ -32,11 +32,13 @@ const Navbar = () => {
           to="/"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
+          <div className="dark:bg-white dark:px-3 dark:py-1.5 dark:rounded-xl transition-all">
           <img
             src={assets.logo}
             alt="Imagify Logo"
             className="w-28 sm:w-32 lg:w-40 cursor-pointer hover:scale-105 transition-transform duration-300"
           />
+          </div>
         </Link>
         {/* Right Section */}
         {user ? (
