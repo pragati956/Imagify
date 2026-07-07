@@ -3,19 +3,18 @@ import { AppContext } from '../context/AppContext';
 import { motion as Motion } from 'motion/react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Download } from 'lucide-react'; // Added Icons
 
 const MyCreations = () => {
     const { backendUrl, token } = useContext(AppContext);
+    const navigate = useNavigate(); // Added for the Back Button
     
-    // State to hold the master list from the database
     const [allImages, setAllImages] = useState([]);
-    // State to hold the currently displayed (searched) images
     const [filteredImages, setFilteredImages] = useState([]);
-    
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
 
-    // 1. Fetch all creations ONLY once when the page loads
     const fetchCreations = useCallback(async () => {
         try {
             const { data } = await axios.get(backendUrl + '/api/image/creations', {
@@ -23,7 +22,7 @@ const MyCreations = () => {
             });
             if (data.success) {
                 setAllImages(data.images);
-                setFilteredImages(data.images); // Initially show all images
+                setFilteredImages(data.images); 
             } else {
                 toast.error(data.message);
             }
@@ -34,7 +33,6 @@ const MyCreations = () => {
         }
     }, [backendUrl, token]);
 
-    // Fetch images on mount or when token changes
     useEffect(() => {
         if (token) {
             fetchCreations();
@@ -43,8 +41,6 @@ const MyCreations = () => {
         }
     }, [token, fetchCreations]);
 
-    // 2. Real-time Client-Side Search
-    // This runs instantly whenever the 'search' state changes (on every keystroke)
     useEffect(() => {
         if (search.trim() === '') {
             setFilteredImages(allImages);
@@ -64,7 +60,6 @@ const MyCreations = () => {
             });
             if (data.success) {
                 toast.success("Creation deleted");
-                // Remove from both states to keep UI in sync without refreshing
                 setAllImages(prev => prev.filter(img => img._id !== imageId));
                 setFilteredImages(prev => prev.filter(img => img._id !== imageId));
             } else {
@@ -87,8 +82,20 @@ const MyCreations = () => {
             viewport={{ once: true }}
             className="min-h-[80vh] py-10"
         >
-            <div className="flex flex-col md:flex-row justify-between items-center mb-10">
-                <h1 className="text-3xl sm:text-4xl font-semibold mb-4 md:mb-0">My Creations</h1>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 md:gap-0">
+                
+                {/* Back Button & Title Wrapper */}
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <button 
+                        onClick={() => navigate('/')} 
+                        className="p-2 bg-white border border-gray-200 shadow-sm rounded-full hover:bg-gray-50 transition-colors"
+                        title="Back to Home"
+                    >
+                        <ArrowLeft className="text-gray-700" size={22} />
+                    </button>
+                    <h1 className="text-3xl sm:text-4xl font-semibold">My Creations</h1>
+                </div>
+
                 <input
                     type="text"
                     placeholder="Search by prompt..."
@@ -124,18 +131,31 @@ const MyCreations = () => {
                                     "{item.prompt}"
                                 </p>
                                 <div className="flex justify-between items-center border-t pt-3 mt-auto">
-                                    <p className="text-xs text-gray-400">
+                                    
+                                    <p className="text-xs text-gray-400 font-medium">
                                         {new Date(item.createdAt).toLocaleString('en-IN', {
-                                            day: 'numeric', month: 'short', year: 'numeric',
-                                            hour: '2-digit', minute: '2-digit'
+                                            day: 'numeric', month: 'short', year: 'numeric'
                                         })}
                                     </p>
-                                    <button 
-                                        onClick={() => handleDelete(item._id)}
-                                        className="text-red-500 hover:text-red-700 text-xs font-semibold px-3 py-1 bg-red-50 hover:bg-red-100 rounded-full transition-colors"
-                                    >
-                                        Delete
-                                    </button>
+                                    
+                                    {/* Action Buttons: Download & Delete */}
+                                    <div className="flex items-center gap-2">
+                                        <a 
+                                            href={item.image} 
+                                            download={`Imagify-${item._id}.png`}
+                                            className="bg-blue-50 hover:bg-blue-100 text-blue-600 p-1.5 rounded-full transition-colors flex items-center justify-center"
+                                            title="Download Image"
+                                        >
+                                            <Download size={16} />
+                                        </a>
+                                        <button 
+                                            onClick={() => handleDelete(item._id)}
+                                            className="text-red-500 hover:text-red-700 text-xs font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-full transition-colors"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+
                                 </div>
                             </div>
                         </Motion.div>
