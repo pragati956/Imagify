@@ -6,19 +6,24 @@ import { toast } from 'react-toastify';
 
 const MyCreations = () => {
     const { backendUrl, token } = useContext(AppContext);
-    const [images, setImages] = useState([]);
+    
+    // State to hold the master list from the database
+    const [allImages, setAllImages] = useState([]);
+    // State to hold the currently displayed (searched) images
+    const [filteredImages, setFilteredImages] = useState([]);
+    
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
 
-    const fetchCreations = useCallback(async (searchQuery = '') => {
+    // 1. Fetch all creations ONLY once when the page loads
+    const fetchCreations = useCallback(async () => {
         try {
-            // Using Axios params handles the ?search= formatting and prevents double-slash bugs
             const { data } = await axios.get(backendUrl + '/api/image/creations', {
-                params: { search: searchQuery },
                 headers: { token }
             });
             if (data.success) {
-                setImages(data.images);
+                setAllImages(data.images);
+                setFilteredImages(data.images); // Initially show all images
             } else {
                 toast.error(data.message);
             }
@@ -29,6 +34,29 @@ const MyCreations = () => {
         }
     }, [backendUrl, token]);
 
+    // Fetch images on mount or when token changes
+    useEffect(() => {
+        if (token) {
+            fetchCreations();
+        } else {
+            setLoading(false);
+        }
+    }, [token, fetchCreations]);
+
+    // 2. Real-time Client-Side Search
+    // This runs instantly whenever the 'search' state changes (on every keystroke)
+    useEffect(() => {
+        if (search.trim() === '') {
+            setFilteredImages(allImages);
+        } else {
+            const lowercasedSearch = search.toLowerCase();
+            const filtered = allImages.filter(item => 
+                item.prompt.toLowerCase().includes(lowercasedSearch)
+            );
+            setFilteredImages(filtered);
+        }
+    }, [search, allImages]);
+
     const handleDelete = async (imageId) => {
         try {
             const { data } = await axios.delete(backendUrl + `/api/image/creations/${imageId}`, {
@@ -36,7 +64,9 @@ const MyCreations = () => {
             });
             if (data.success) {
                 toast.success("Creation deleted");
-                setImages(images.filter(img => img._id !== imageId));
+                // Remove from both states to keep UI in sync without refreshing
+                setAllImages(prev => prev.filter(img => img._id !== imageId));
+                setFilteredImages(prev => prev.filter(img => img._id !== imageId));
             } else {
                 toast.error(data.message);
             }
@@ -45,15 +75,6 @@ const MyCreations = () => {
         }
     };
 
-    useEffect(() => {
-        if (token) {
-            fetchCreations(search);
-        } else {
-            setLoading(false);
-        }
-    }, [token, search, fetchCreations]);
-
-    // If no token, show login message
     if (!token) {
         return <div className="text-center mt-20 text-xl font-medium">Please login to view your creations.</div>;
     }
@@ -81,13 +102,17 @@ const MyCreations = () => {
                 <div className="flex justify-center items-center h-40">
                     <p className="text-gray-500 text-lg animate-pulse">Loading your masterpieces...</p>
                 </div>
-            ) : images.length === 0 ? (
+            ) : filteredImages.length === 0 ? (
                 <div className="text-center mt-20">
-                    <p className="text-gray-500 text-lg">No creations found. Go generate some magic!</p>
+                    <p className="text-gray-500 text-lg">
+                        {allImages.length === 0 
+                            ? "No creations found. Go generate some magic!" 
+                            : "No images match your search."}
+                    </p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {images.map((item) => (
+                    {filteredImages.map((item) => (
                         <Motion.div 
                             key={item._id} 
                             whileHover={{ scale: 1.02 }}
