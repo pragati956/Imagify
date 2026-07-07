@@ -3,6 +3,7 @@ import { motion as Motion } from "motion/react";
 import { AppContext } from '../context/AppContext';
 import { toast } from "react-toastify";
 import { Copy, Sparkles, RotateCcw, Wand2, Image as ImageIcon, X } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom"; // Make sure useLocation is here
 
 // Predefined Suggestions & Effects
 const suggestions = [
@@ -32,6 +33,17 @@ const Result = () => {
   const [selectedTags, setSelectedTags] = useState([]);
 
   const { generateImage, enhancePrompt } = useContext(AppContext);
+
+  const location = useLocation();
+
+// Catch the Remix prompt
+useEffect(() => {
+  if (location.state && location.state.remixPrompt) {
+    setInput(location.state.remixPrompt);
+    // Clear the router state so it doesn't trigger again on page refresh
+    window.history.replaceState({}, document.title);
+  }
+}, [location]);
 
   // Toggle a tag on/off
   const toggleTag = (tag) => {
