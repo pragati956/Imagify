@@ -11,8 +11,6 @@ const Home = () => {
       <Header />
       <Steps />
       <Description />
-      <Testimonials />
-      <GenerateBtn />
     </div>
   );
 };
