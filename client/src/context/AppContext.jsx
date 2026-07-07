@@ -12,7 +12,17 @@ const AppContextProvider = (props)=>{
      const [showLogin,setShowLogin]=useState(false);
 
      const [token,setToken]=useState(localStorage.getItem('token'))
-     const [credit,setCredit]=useState(false)
+     const [credit,setCredit]=useState(false);
+     // --- ADD THIS DARK MODE LOGIC ---
+     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+     useEffect(() => {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        localStorage.setItem('theme', theme);
+     }, [theme]);
      const backendUrl=import.meta.env.VITE_BACKEND_URL
      const navigate= useNavigate()
      const enhancePrompt = async (prompt) => {
@@ -103,7 +113,7 @@ const AppContextProvider = (props)=>{
       loadCredits();
      }, [token, loadCredits]);
      const value={
-        user,setUser,showLogin,setShowLogin,backendUrl,token,setToken,credit,setCredit,loadCredits,logout,generateImage,enhancePrompt
+        user,setUser,showLogin,setShowLogin,backendUrl,token,setToken,credit,setCredit,loadCredits,logout,generateImage,enhancePrompt, theme, setTheme
      }
      return (
         <AppContext.Provider

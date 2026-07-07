@@ -19,7 +19,7 @@ import Login from './components/auth/Login'
 const App = () => {
   const { showLogin } = useContext(AppContext)
   return (
-<div className="min-h-screen bg-gradient-to-b from-teal-100 to-orange-200">      <ToastContainer position='bottom-right' />
+<div className="min-h-screen bg-gradient-to-b from-teal-100 to-orange-200 dark:from-gray-900 dark:to-gray-950 dark:text-white transition-colors duration-300">      <ToastContainer position='bottom-right' />
      <Navbar />
 
 {showLogin && <Login />}
