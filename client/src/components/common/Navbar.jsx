@@ -2,7 +2,7 @@ import React, { useContext, useState, useRef, useEffect } from "react";
 import { assets } from "../../assets/assets";
 import { Link, useNavigate } from "react-router-dom";
 import { AppContext } from "../../context/AppContext";
-import { Moon, Sun } from "lucide-react"; // <-- Add this import
+import { Moon, Sun } from "lucide-react";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -10,6 +10,7 @@ const Navbar = () => {
 
   const { user, setShowLogin, logout, credit, theme, setTheme } = useContext(AppContext);
   const navigate = useNavigate();
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -27,19 +28,18 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 bg-white/70 dark:bg-gray-900/80 backdrop-blur-xl shadow-sm border-b border-gray-100 dark:border-gray-800 transition-colors">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
-        {/* Logo */}
+        {/* Logo — no boxed pill, logo itself adapts to the theme */}
         <Link
           to="/"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
-          <div className="dark:bg-white dark:px-3 dark:py-1.5 dark:rounded-xl transition-all">
           <img
             src={assets.logo}
             alt="Imagify Logo"
-            className="w-28 sm:w-32 lg:w-40 cursor-pointer hover:scale-105 transition-transform duration-300"
+            className="w-28 sm:w-32 lg:w-40 cursor-pointer hover:scale-105 transition-transform duration-300 dark:brightness-0 dark:invert"
           />
-          </div>
         </Link>
+
         {/* Right Section */}
         {user ? (
           <div className="flex items-center gap-3 sm:gap-5">
@@ -55,7 +55,7 @@ const Navbar = () => {
             {/* Credits */}
             <button
               onClick={() => navigate("/buy")}
-              className="flex items-center gap-2 bg-blue-200 px-4 sm:px-6 py-1.5 sm:py-3 rounded-full hover:scale-105 transition duration-300"
+              className="flex items-center gap-2 bg-blue-200 dark:bg-gray-800 text-gray-800 dark:text-gray-100 px-4 sm:px-6 py-1.5 sm:py-3 rounded-full hover:scale-105 transition duration-300"
             >
               <img
                 src={assets.credit_star}
@@ -71,9 +71,10 @@ const Navbar = () => {
             </button>
 
             {/* Username */}
-            <p className="hidden sm:block max-w-[120px] truncate">
+            <p className="hidden sm:block max-w-[120px] truncate text-gray-800 dark:text-gray-200 transition-colors">
               Hi, {user?.name || "User"}
             </p>
+
             {/* Profile Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <img
@@ -92,7 +93,7 @@ const Navbar = () => {
                         navigate("/creations");
                         setOpen(false);
                       }}
-                      className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b dark:border-gray-700"
+                      className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 cursor-pointer border-b dark:border-gray-700 transition-colors"
                     >
                       My Creations
                     </li>
@@ -102,7 +103,7 @@ const Navbar = () => {
                         logout();
                         setOpen(false);
                       }}
-                      className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                      className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 cursor-pointer transition-colors"
                     >
                       Logout
                     </li>
@@ -132,7 +133,7 @@ const Navbar = () => {
 
             <button
               onClick={() => setShowLogin(true)}
-              className="bg-zinc-800 text-white px-7 py-2 sm:px-10 text-sm rounded-full hover:scale-105 transition-all duration-300 shadow-md active:scale-95"
+              className="bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-7 py-2 sm:px-10 text-sm rounded-full hover:scale-105 transition-all duration-300 shadow-md active:scale-95"
             >
               Login
             </button>
