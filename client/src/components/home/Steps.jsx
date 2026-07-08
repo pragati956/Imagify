@@ -28,7 +28,7 @@ font-bold  mb-2">
         How it works
       </h1>
 
-      <p className="text-lg text-gray-600">
+      <p className="text-lg text-gray-500 dark:text-gray-400 transition-colors">
         Transform Words Into Stunning Images
       </p>
 
