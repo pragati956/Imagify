@@ -74,18 +74,27 @@ const AppContextProvider = (props)=>{
          toast.error(error.message)
       }
      }, [backendUrl, token]);
-     const generateImage=async(prompt)=>{
+     const generateImage=async(prompt, referenceImage = null)=>{ // Added referenceImage parameter
       try{
-       const {data}=await axios.post(backendUrl + '/api/image/generate-image',{prompt},{headers: {token}})
-       if (data.success) {
-  loadCredits();
+       const formData = new FormData(); // Switched payload to FormData
+       formData.append("prompt", prompt);
+       if (referenceImage) {
+         formData.append("referenceImage", referenceImage);
+       }
 
-  return {
-    image: data.resultImage,
-    originalPrompt: data.originalPrompt,
-  };
-}
-       else{
+       const {data}=await axios.post(backendUrl + '/api/image/generate-image', formData, { // Passed formData
+           headers: {
+               token,
+           }
+       })
+       if (data.success) {
+ loadCredits();
+
+ return {
+   image: data.resultImage,
+   originalPrompt: data.originalPrompt,
+ };
+}       else{
          toast.error(data.message)
          loadCredits()
          if(data.creditBalance===0)
