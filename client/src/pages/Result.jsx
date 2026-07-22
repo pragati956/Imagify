@@ -62,13 +62,16 @@ const Result = () => {
       const styleContext = selectedTags.length > 0 ? `(Apply these styles: ${selectedTags.join(", ")})` : "";
       const promptToOptimize = `${input} ${styleContext}`.trim();
       
-      const prompt = await enhancePrompt(promptToOptimize);
+      const prompt = await enhancePrompt(promptToOptimize, referenceImage);
       if (prompt) setEnhancedPrompt(prompt);
       setOptimizing(false);
     }, 700);
 
     return () => clearTimeout(timer);
-  }, [input, selectedTags, enhancePrompt]);
+  // Use referenceImage?.name (stable string) instead of the File object itself
+  // to prevent infinite re-triggers on every render cycle.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, selectedTags, referenceImage?.name]);
 
   const copyPrompt = async () => {
     try {

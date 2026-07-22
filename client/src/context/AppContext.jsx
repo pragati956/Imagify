@@ -25,40 +25,36 @@ const AppContextProvider = (props)=>{
      }, [theme]);
      const backendUrl=import.meta.env.VITE_BACKEND_URL
      const navigate= useNavigate()
-     const enhancePrompt = async (prompt) => {
-
-  try {
-
-    const { data } = await axios.post(
-
-      backendUrl + "/api/image/enhance-prompt",
-
-      { prompt },
-
-      {
-        headers: { token }
+       const enhancePrompt = async (prompt, referenceImage = null) => {
+   try {
+      // Always send as FormData so the server's multer middleware can handle
+      // both text-only and image-attached enhance requests on the same route.
+      const formData = new FormData();
+      formData.append("prompt", prompt);
+      if (referenceImage) {
+         formData.append("referenceImage", referenceImage);
       }
 
-    );
+      const { data } = await axios.post(
+         backendUrl + "/api/image/enhance-prompt",
+         formData,
+         {
+            headers: { token }
+            // DO NOT set Content-Type manually — axios + FormData sets it
+            // automatically with the correct multipart boundary.
+         }
+      );
 
-    if(data.success){
+      if (data.success) {
+         return data.enhancedPrompt;
+      }
 
-      return data.enhancedPrompt;
-
-    }
-
-    return "";
-
-  }
-
-  catch(error){
-
-    console.log(error);
-
-    return "";
-
-  }
-
+      return "";
+   }
+   catch(error){
+      console.error("enhancePrompt error:", error);
+      return "";
+   }
 }
      
      const loadCredits = useCallback(async () => {
