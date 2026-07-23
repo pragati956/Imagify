@@ -1,4 +1,5 @@
 import express from "express";
+import multer from "multer"; // Added for image upload
 import {
   enhancePrompt,
   generateImage, getUserCreations, deleteCreation,
@@ -7,11 +8,13 @@ import {
 import userAuth from "../middleware/auth.js";
 
 const imageRouter = express.Router();
+const upload = multer({ storage: multer.memoryStorage() }); // Configured multer memory storage
 
 // AI Prompt Optimizer
 imageRouter.post(
   "/enhance-prompt",
   userAuth,
+  upload.single("referenceImage"), // Added multer middleware to parse the file
   enhancePrompt
 );
 
@@ -19,6 +22,7 @@ imageRouter.post(
 imageRouter.post(
   "/generate-image",
   userAuth,
+  upload.single("referenceImage"),
   generateImage
 );
 

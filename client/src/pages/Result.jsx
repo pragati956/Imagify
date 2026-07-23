@@ -28,6 +28,9 @@ const Result = () => {
   const [enhancedPrompt, setEnhancedPrompt] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
 
+  const [referenceImage, setReferenceImage] = useState(null); // Added state for reference image
+  const [previewUrl, setPreviewUrl] = useState(null); // Added state for preview
+
   const { generateImage, enhancePrompt } = useContext(AppContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,13 +62,16 @@ const Result = () => {
       const styleContext = selectedTags.length > 0 ? `(Apply these styles: ${selectedTags.join(", ")})` : "";
       const promptToOptimize = `${input} ${styleContext}`.trim();
       
-      const prompt = await enhancePrompt(promptToOptimize);
+      const prompt = await enhancePrompt(promptToOptimize, referenceImage);
       if (prompt) setEnhancedPrompt(prompt);
       setOptimizing(false);
     }, 700);
 
     return () => clearTimeout(timer);
-  }, [input, selectedTags, enhancePrompt]);
+  // Use referenceImage?.name (stable string) instead of the File object itself
+  // to prevent infinite re-triggers on every render cycle.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, selectedTags, referenceImage?.name]);
 
   const copyPrompt = async () => {
     try {
@@ -89,7 +95,7 @@ const Result = () => {
     const tagPrefix = selectedTags.length > 0 ? `${selectedTags.join(", ")} style, highly detailed. ` : "";
     const finalPrompt = `${tagPrefix}${basePromptToUse}`;
 
-    const result = await generateImage(finalPrompt);
+    const result = await generateImage(finalPrompt, referenceImage); // Passed reference image
     
     if (result) {
       setImage(result.image);
@@ -107,6 +113,16 @@ const Result = () => {
     setEnhancedPrompt("");
     setImage(null);
     setSelectedTags([]);
+    setReferenceImage(null); // Cleared reference image
+    setPreviewUrl(null); // Cleared preview
+  };
+
+  const handleImageUpload = (e) => { // Added handler for file input
+    const file = e.target.files[0];
+    if (file) {
+      setReferenceImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
   };
 
   return (
@@ -234,12 +250,32 @@ const Result = () => {
                 </div>
               )}
 
+              {previewUrl && ( // Added image preview display
+                <div className="relative mb-3 w-32 h-32">
+                  <img src={previewUrl} alt="Reference" className="w-full h-full object-cover rounded-lg border border-gray-300 dark:border-gray-600" />
+                  <button 
+                    type="button" 
+                    onClick={() => { setReferenceImage(null); setPreviewUrl(null); }} 
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:scale-105"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
+
               <textarea
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 placeholder="Describe what you want to generate..."
                 className="flex-1 w-full bg-transparent outline-none resize-none min-h-[120px] text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               />
+
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700"> {/* Added file input trigger */}
+                <label className="cursor-pointer text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-2 w-max">
+                  <ImageIcon size={16} /> Upload Style Reference (Optional)
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                </label>
+              </div>
             </div>
 
             <div className="bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm flex flex-col relative focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 dark:focus-within:ring-blue-900/50 transition-all">
