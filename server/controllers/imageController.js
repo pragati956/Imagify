@@ -102,11 +102,7 @@ const generateImage = async (req, res) => {
                 message: "Missing Clipdrop API key for image generation.",
             });
         }
-
-        let finalPrompt = prompt;
-        if (file) {
-            finalPrompt = await optimizePrompt(prompt, file);
-        }
+const finalPrompt = prompt;
 
         const formData = new FormData();
         formData.append("prompt", finalPrompt);

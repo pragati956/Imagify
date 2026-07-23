@@ -51,27 +51,31 @@ const Result = () => {
     }
   };
 
-  useEffect(() => {
-    if (!input || input.trim().length < 5) {
-      setEnhancedPrompt("");
-      return;
+const handleEnhancePrompt = async () => {
+
+    if(!input.trim()) return;
+
+    setOptimizing(true);
+
+    const styleContext =
+        selectedTags.length>0
+        ? `(Apply these styles: ${selectedTags.join(", ")})`
+        : "";
+
+    const promptToOptimize =
+        `${input} ${styleContext}`.trim();
+
+    const prompt = await enhancePrompt(
+        promptToOptimize,
+        referenceImage
+    );
+
+    if(prompt){
+        setEnhancedPrompt(prompt);
     }
 
-    const timer = setTimeout(async () => {
-      setOptimizing(true);
-      const styleContext = selectedTags.length > 0 ? `(Apply these styles: ${selectedTags.join(", ")})` : "";
-      const promptToOptimize = `${input} ${styleContext}`.trim();
-      
-      const prompt = await enhancePrompt(promptToOptimize, referenceImage);
-      if (prompt) setEnhancedPrompt(prompt);
-      setOptimizing(false);
-    }, 700);
-
-    return () => clearTimeout(timer);
-  // Use referenceImage?.name (stable string) instead of the File object itself
-  // to prevent infinite re-triggers on every render cycle.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, selectedTags, referenceImage?.name]);
+    setOptimizing(false);
+}
 
   const copyPrompt = async () => {
     try {
@@ -84,27 +88,38 @@ const Result = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
-    const basePromptToUse = enhancedPrompt.trim() || input.trim();
 
-    if (!basePromptToUse) {
-      toast.error("Prompt cannot be empty");
-      return;
+    if (!input.trim()) {
+        toast.error("Prompt cannot be empty");
+        return;
     }
 
     setLoading(true);
-    const tagPrefix = selectedTags.length > 0 ? `${selectedTags.join(", ")} style, highly detailed. ` : "";
-    const finalPrompt = `${tagPrefix}${basePromptToUse}`;
 
-    const result = await generateImage(finalPrompt, referenceImage); // Passed reference image
-    
+    const tagPrefix =
+        selectedTags.length > 0
+            ? `${selectedTags.join(", ")} style, highly detailed. `
+            : "";
+
+    const finalPrompt = `${tagPrefix}${input.trim()}`;
+
+    const result = await generateImage(finalPrompt, referenceImage);
+
     if (result) {
-      setImage(result.image);
-      setOriginalPrompt(finalPrompt); 
-      setEnhancedPrompt(result.originalPrompt); 
-      setImageLoaded(true);
+        setImage(result.image);
+        setOriginalPrompt(finalPrompt);
+        setImageLoaded(true);
     }
+
     setLoading(false);
-  };
+};
+const useSuggestion = () => {
+    setInput(enhancedPrompt);
+    setEnhancedPrompt("");
+};
+const keepOriginal = () => {
+    setEnhancedPrompt("");
+};
 
   const resetForm = () => {
     setImageLoaded(false);
@@ -211,6 +226,7 @@ const Result = () => {
 
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-colors">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wider">Style Tags</h3>
+            
             <div className="flex flex-wrap gap-2">
               {effectTags.map((eff, idx) => {
                 const isActive = selectedTags.includes(eff);
@@ -269,6 +285,14 @@ const Result = () => {
                 placeholder="Describe what you want to generate..."
                 className="flex-1 w-full bg-transparent outline-none resize-none min-h-[120px] text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               />
+              <button
+    type="button"
+    onClick={handleEnhancePrompt}
+    disabled={optimizing || !input.trim()}
+    className="mt-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg px-4 py-2"
+>
+    {optimizing ? "Enhancing..." : "✨ Enhance Prompt"}
+</button>
 
               <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700"> {/* Added file input trigger */}
                 <label className="cursor-pointer text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-2 w-max">
@@ -279,10 +303,45 @@ const Result = () => {
             </div>
 
             <div className="bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm flex flex-col relative focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 dark:focus-within:ring-blue-900/50 transition-all">
-              <h3 className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2 justify-between">
-                <span className="flex items-center gap-2"><Sparkles size={18} /> AI Assistant</span>
-                {optimizing && <span className="text-xs font-medium text-blue-500 dark:text-blue-300 animate-pulse bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded-full">Optimizing...</span>}
-              </h3>
+             <h3 className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-3 flex items-center justify-between">
+
+    <span className="flex items-center gap-2">
+        <Sparkles size={18} />
+        AI Assistant
+    </span>
+
+    {optimizing && (
+        <span className="text-xs font-medium text-blue-500 dark:text-blue-300 animate-pulse bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded-full">
+            Optimizing...
+        </span>
+    )}
+
+</h3>
+{!enhancedPrompt ? (
+
+    <div className="flex flex-col justify-center items-center h-full text-center py-8">
+
+        <Sparkles className="text-blue-500 mb-3" size={32} />
+
+        <h4 className="font-semibold text-gray-800 dark:text-white">
+            No AI Suggestion Yet
+        </h4>
+
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            Type your prompt and click
+            <br />
+            <span className="font-semibold">
+                ✨ Enhance Prompt
+            </span>
+            to get an AI-improved version.
+        </p>
+
+    </div>
+
+) : (
+  <>
+              
+
               <textarea
                 disabled={loading || optimizing}
                 value={enhancedPrompt}
@@ -290,9 +349,30 @@ const Result = () => {
                 placeholder="The AI will enhance your prompt here based on your tags. You can manually edit this text before generating."
                 className="flex-1 w-full bg-transparent outline-none resize-none min-h-[120px] text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               />
+              <div className="flex gap-3 mt-4">
+
+    <button
+        type="button"
+        onClick={useSuggestion}
+        className="flex-1 bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700"
+    >
+        Use Suggestion
+    </button>
+
+    <button
+        type="button"
+        onClick={keepOriginal}
+        className="flex-1 border border-gray-300 rounded-lg py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+    >
+        Keep Original
+    </button>
+
+</div>
+
+    
               {enhancedPrompt && (
                  <div className="absolute bottom-6 right-6 flex gap-2">
-                    <button type="button" onClick={() => setEnhancedPrompt(input)} className="bg-white dark:bg-gray-800 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 border dark:border-gray-600 shadow-sm transition-colors" title="Restore Original">
+                    <button type="button" onClick={keepOriginal} className="bg-white dark:bg-gray-800 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 border dark:border-gray-600 shadow-sm transition-colors" title="Restore Original">
                       <RotateCcw size={16} className="text-gray-600 dark:text-gray-300" />
                     </button>
                     <button type="button" onClick={copyPrompt} className="bg-white dark:bg-gray-800 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 border dark:border-gray-600 shadow-sm transition-colors" title="Copy Prompt">
@@ -300,6 +380,8 @@ const Result = () => {
                     </button>
                  </div>
               )}
+              </>
+)}
             </div>
           </div>
 
