@@ -3,8 +3,7 @@ import { motion as Motion } from "motion/react";
 import { AppContext } from '../context/AppContext';
 import { useNavigate, useLocation } from "react-router-dom"; 
 import { toast } from "react-toastify";
-import { Copy, Sparkles, RotateCcw, Wand2, Image as ImageIcon, X, ArrowLeft, Users } from "lucide-react"; 
-import { v4 as uuidv4 } from 'uuid'; 
+import { Copy, Sparkles, RotateCcw, Wand2, Image as ImageIcon, X, ArrowLeft, Users, PlusCircle, LogIn } from "lucide-react"; 
 
 const suggestions = [
   "A futuristic cyberpunk city with flying cars at sunset",
@@ -31,6 +30,10 @@ const Result = () => {
 
   const [referenceImage, setReferenceImage] = useState(null); 
   const [previewUrl, setPreviewUrl] = useState(null); 
+
+  // Added modal and join-code states
+  const [showCollabModal, setShowCollabModal] = useState(false);
+  const [inputRoomId, setInputRoomId] = useState('');
 
   const { generateImage, enhancePrompt, user, setShowLogin } = useContext(AppContext);
   const navigate = useNavigate();
@@ -79,13 +82,32 @@ const Result = () => {
     }
   };
 
-  const handleCollaborate = () => {
+  // Open collaboration selection modal
+  const handleOpenCollabModal = () => {
     if (!user) {
       setShowLogin(true);
       return;
     }
-    const roomId = uuidv4();
-    navigate(`/collaboration/${roomId}`, { state: { initialPrompt: input } });
+    setShowCollabModal(true);
+  };
+
+  // Create a brand new room code
+  const handleCreateNewRoom = () => {
+    const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    setShowCollabModal(false);
+    navigate(`/collaboration/${newRoomCode}`, { state: { initialPrompt: input } });
+  };
+
+  // Join an existing room via typed ID
+  const handleJoinExistingRoom = (e) => {
+    e.preventDefault();
+    const cleanedCode = inputRoomId.trim().toUpperCase();
+    if (!cleanedCode) {
+      toast.error("Please enter a valid Room Code");
+      return;
+    }
+    setShowCollabModal(false);
+    navigate(`/collaboration/${cleanedCode}`, { state: { initialPrompt: input } });
   };
 
   const onSubmitHandler = async (e) => {
@@ -149,9 +171,74 @@ const Result = () => {
       transition={{ duration: 0.6 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className='flex flex-col min-h-[80vh] justify-center items-center py-10'
+      className='flex flex-col min-h-[80vh] justify-center items-center py-10 relative'
     >
-      
+      {/* Collaboration Option Modal */}
+      {showCollabModal && (
+        <div 
+          className="fixed inset-0 z-50 backdrop-blur-sm bg-black/40 flex justify-center items-center p-4"
+          onClick={() => setShowCollabModal(false)}
+        >
+          <Motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
+          >
+            <button 
+              onClick={() => setShowCollabModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white"
+            >
+              <X size={20} />
+            </button>
+
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-1 flex items-center gap-2">
+              <Users className="text-purple-500" /> Collaboration
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Work together on a prompt in real-time.</p>
+
+            <div className="flex flex-col gap-4">
+              {/* Option A: Create Room */}
+              <button
+                type="button"
+                onClick={handleCreateNewRoom}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-500/20"
+              >
+                <PlusCircle size={18} /> Create New Room
+              </button>
+
+              <div className="flex items-center my-1">
+                <div className="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
+                <span className="px-3 text-xs text-gray-400 uppercase tracking-wider font-medium">or</span>
+                <div className="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
+              </div>
+
+              {/* Option B: Join Room via ID */}
+              <form onSubmit={handleJoinExistingRoom} className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  Join via Room Code
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="e.g. 8F92A1"
+                    value={inputRoomId}
+                    onChange={(e) => setInputRoomId(e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-2.5 outline-none focus:border-purple-500 dark:text-white uppercase font-mono tracking-wider text-sm"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-gray-800 dark:bg-gray-100 text-white dark:text-gray-900 font-semibold px-4 py-2.5 rounded-xl hover:scale-105 transition-all text-sm flex items-center gap-1"
+                  >
+                    <LogIn size={16} /> Join
+                  </button>
+                </div>
+              </form>
+            </div>
+          </Motion.div>
+        </div>
+      )}
+
       {isImageLoaded ? (
         <div className="w-full max-w-2xl flex flex-col items-center">
           <div className='relative overflow-hidden rounded-xl shadow-xl border dark:border-gray-700'>
@@ -211,7 +298,7 @@ const Result = () => {
 
             <button 
                 type="button"
-                onClick={handleCollaborate} 
+                onClick={handleOpenCollabModal} 
                 className="absolute right-0 hidden md:flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/30 text-purple-600 border border-purple-200 dark:border-purple-700 shadow-sm rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors font-medium text-sm"
             >
                 <Users size={18} /> Collaborate
@@ -393,7 +480,7 @@ const Result = () => {
               
               <button 
                 type="button"
-                onClick={handleCollaborate} 
+                onClick={handleOpenCollabModal} 
                 className="md:hidden flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 py-4 rounded-xl font-semibold text-lg flex justify-center items-center gap-2 transition-colors"
               >
                 <Users size={20} /> Collaborate

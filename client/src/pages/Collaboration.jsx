@@ -10,7 +10,7 @@ const Collaboration = () => {
     const { roomId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const { user, backendUrl, generateImage, loadCredits } = useContext(AppContext);
+    const { user, backendUrl, generateImage } = useContext(AppContext);
     
     const [prompt, setPrompt] = useState(location.state?.initialPrompt || "");
     const [isGenerating, setIsGenerating] = useState(false);
@@ -25,32 +25,29 @@ const Collaboration = () => {
             return;
         }
 
-        // Initialize Socket
         socketRef.current = io(backendUrl);
 
-        // Join Room
         socketRef.current.emit("join_room", { roomId, userName: user.name });
 
-        // Listen for new users
         socketRef.current.on("user_joined", (message) => {
             setActivities(prev => [...prev, { type: 'join', text: message }]);
             toast.info(message);
         });
 
-        // Listen for prompt updates from others
         socketRef.current.on("receive_prompt_update", (newPrompt) => {
             setPrompt(newPrompt);
         });
 
-        // Listen for users leaving
         socketRef.current.on("user_left", (message) => {
             setActivities(prev => [...prev, { type: 'leave', text: message }]);
             toast.info(message);
         });
 
         return () => {
-            socketRef.current.emit("leave_room", { roomId, userName: user.name });
-            socketRef.current.disconnect();
+            if (socketRef.current) {
+                socketRef.current.emit("leave_room", { roomId, userName: user.name });
+                socketRef.current.disconnect();
+            }
         };
     }, [roomId, user, backendUrl, navigate]);
 
@@ -60,10 +57,9 @@ const Collaboration = () => {
         socketRef.current.emit("send_prompt_update", { roomId, prompt: newText });
     };
 
-    const copyInviteLink = () => {
-        const url = window.location.href;
-        navigator.clipboard.writeText(url);
-        toast.success("Invite link copied!");
+    const copyRoomCode = () => {
+        navigator.clipboard.writeText(roomId);
+        toast.success(`Room Code ${roomId} copied to clipboard!`);
     };
 
     const handleGenerate = async () => {
@@ -90,7 +86,7 @@ const Collaboration = () => {
             className="max-w-5xl mx-auto py-10 min-h-[80vh] flex flex-col"
         >
             {/* Header */}
-            <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm mb-6 gap-4 sm:gap-0">
                 <div className="flex items-center gap-4">
                     <button onClick={() => navigate('/result')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
                         <ArrowLeft className="text-gray-600 dark:text-gray-300" size={20} />
@@ -99,15 +95,23 @@ const Collaboration = () => {
                         <h1 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                             <Users size={20} className="text-purple-500" /> Collaboration Room
                         </h1>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Room ID: {roomId.slice(0, 8)}...</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Room Code: <span className="font-mono font-bold text-purple-600 dark:text-purple-400 text-sm">{roomId}</span>
+                        </p>
                     </div>
                 </div>
                 
-                <div className="flex gap-2">
-                    <button onClick={copyInviteLink} className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
-                        <Copy size={16} /> Copy Invite Link
+                <div className="flex gap-2 w-full sm:w-auto">
+                    <button 
+                        onClick={copyRoomCode} 
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 border border-purple-200 dark:border-purple-700 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-purple-100 transition-colors"
+                    >
+                        <Copy size={16} /> Copy Code
                     </button>
-                    <button onClick={() => navigate('/result')} className="flex items-center gap-2 bg-red-50 dark:bg-red-900/30 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors">
+                    <button 
+                        onClick={() => navigate('/result')} 
+                        className="flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-700 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors"
+                    >
                         <LogOut size={16} /> Leave
                     </button>
                 </div>
@@ -123,7 +127,7 @@ const Collaboration = () => {
                         value={prompt}
                         onChange={handlePromptChange}
                         placeholder="Start typing your shared vision here. Your teammates will see changes in real-time..."
-                        className="flex-1 w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 outline-none focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-900/50 transition-all resize-none text-gray-800 dark:text-gray-100"
+                        className="flex-1 w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 outline-none focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-900/50 transition-all resize-none text-gray-800 dark:text-gray-100 min-h-[180px]"
                     />
                     
                     <button
@@ -138,9 +142,9 @@ const Collaboration = () => {
                 {/* Sidebar: Activity Feed */}
                 <div className="w-full lg:w-80 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 flex flex-col">
                     <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-wider">Room Activity</h2>
-                    <div className="flex-1 overflow-y-auto space-y-3">
+                    <div className="flex-1 overflow-y-auto space-y-3 min-h-[100px]">
                         {activities.length === 0 ? (
-                            <p className="text-sm text-gray-500 dark:text-gray-400 italic text-center mt-10">Waiting for friends to join...</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 italic text-center mt-6">Share your Room Code above to invite friends!</p>
                         ) : (
                             activities.map((act, i) => (
                                 <div key={i} className={`text-sm px-3 py-2 rounded-lg ${act.type === 'join' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400'}`}>
