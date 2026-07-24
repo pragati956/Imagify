@@ -3,7 +3,6 @@ import React, { useContext } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { AppContext } from './context/AppContext'
 import { ToastContainer } from 'react-toastify';
-// Add this import
 import MyCreations from './pages/MyCreations'
 
 
@@ -13,7 +12,7 @@ import BuyCredit from './pages/BuyCredit'
 import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
 import Login from './components/auth/Login'
-
+import Collaboration from './pages/Collaboration' // Imported Collaboration page
 
 
 const App = () => {
@@ -30,6 +29,7 @@ const App = () => {
         <Route path="/result" element={<Result />} />
         <Route path="/buy" element={<BuyCredit />} />
         <Route path="/creations" element={<MyCreations />} />
+        <Route path="/collaboration/:roomId" element={<Collaboration />} /> {/* Added Collaboration route */}
     </Routes>
 </main>
 

@@ -1,9 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { motion as Motion } from "motion/react";
 import { AppContext } from '../context/AppContext';
-import { useNavigate, useLocation } from "react-router-dom"; // Added routing hooks
+import { useNavigate, useLocation } from "react-router-dom"; 
 import { toast } from "react-toastify";
-import { Copy, Sparkles, RotateCcw, Wand2, Image as ImageIcon, X, ArrowLeft } from "lucide-react"; // Added ArrowLeft
+import { Copy, Sparkles, RotateCcw, Wand2, Image as ImageIcon, X, ArrowLeft, Users } from "lucide-react"; 
+import { v4 as uuidv4 } from 'uuid'; 
 
 const suggestions = [
   "A futuristic cyberpunk city with flying cars at sunset",
@@ -28,14 +29,13 @@ const Result = () => {
   const [enhancedPrompt, setEnhancedPrompt] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
 
-  const [referenceImage, setReferenceImage] = useState(null); // Added state for reference image
-  const [previewUrl, setPreviewUrl] = useState(null); // Added state for preview
+  const [referenceImage, setReferenceImage] = useState(null); 
+  const [previewUrl, setPreviewUrl] = useState(null); 
 
-  const { generateImage, enhancePrompt } = useContext(AppContext);
+  const { generateImage, enhancePrompt, user, setShowLogin } = useContext(AppContext);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Catch the Remix prompt from the MyCreations page
   useEffect(() => {
     if (location.state && location.state.remixPrompt) {
       setInput(location.state.remixPrompt);
@@ -51,31 +51,24 @@ const Result = () => {
     }
   };
 
-const handleEnhancePrompt = async () => {
-
+  const handleEnhancePrompt = async () => {
     if(!input.trim()) return;
-
     setOptimizing(true);
 
-    const styleContext =
-        selectedTags.length>0
+    const styleContext = selectedTags.length > 0
         ? `(Apply these styles: ${selectedTags.join(", ")})`
         : "";
 
-    const promptToOptimize =
-        `${input} ${styleContext}`.trim();
+    const promptToOptimize = `${input} ${styleContext}`.trim();
 
-    const prompt = await enhancePrompt(
-        promptToOptimize,
-        referenceImage
-    );
+    const prompt = await enhancePrompt(promptToOptimize, referenceImage);
 
     if(prompt){
         setEnhancedPrompt(prompt);
     }
 
     setOptimizing(false);
-}
+  };
 
   const copyPrompt = async () => {
     try {
@@ -84,6 +77,15 @@ const handleEnhancePrompt = async () => {
     } catch (error) {
       toast.error("Failed to copy prompt.");
     }
+  };
+
+  const handleCollaborate = () => {
+    if (!user) {
+      setShowLogin(true);
+      return;
+    }
+    const roomId = uuidv4();
+    navigate(`/collaboration/${roomId}`, { state: { initialPrompt: input } });
   };
 
   const onSubmitHandler = async (e) => {
@@ -96,8 +98,7 @@ const handleEnhancePrompt = async () => {
 
     setLoading(true);
 
-    const tagPrefix =
-        selectedTags.length > 0
+    const tagPrefix = selectedTags.length > 0
             ? `${selectedTags.join(", ")} style, highly detailed. `
             : "";
 
@@ -112,14 +113,16 @@ const handleEnhancePrompt = async () => {
     }
 
     setLoading(false);
-};
-const useSuggestion = () => {
+  };
+
+  const useSuggestion = () => {
     setInput(enhancedPrompt);
     setEnhancedPrompt("");
-};
-const keepOriginal = () => {
+  };
+
+  const keepOriginal = () => {
     setEnhancedPrompt("");
-};
+  };
 
   const resetForm = () => {
     setImageLoaded(false);
@@ -128,11 +131,11 @@ const keepOriginal = () => {
     setEnhancedPrompt("");
     setImage(null);
     setSelectedTags([]);
-    setReferenceImage(null); // Cleared reference image
-    setPreviewUrl(null); // Cleared preview
+    setReferenceImage(null); 
+    setPreviewUrl(null); 
   };
 
-  const handleImageUpload = (e) => { // Added handler for file input
+  const handleImageUpload = (e) => { 
     const file = e.target.files[0];
     if (file) {
       setReferenceImage(file);
@@ -191,7 +194,6 @@ const keepOriginal = () => {
       : (
         <form onSubmit={onSubmitHandler} className="w-full max-w-4xl flex flex-col gap-8">
           
-          {/* Header with Back Button */}
           <div className="flex flex-col md:flex-row items-center justify-center relative mb-2">
             <button 
                 type="button"
@@ -206,6 +208,14 @@ const keepOriginal = () => {
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2 transition-colors">Creation Studio</h1>
               <p className="text-gray-500 dark:text-gray-400 transition-colors">Describe your vision, snap on some style tags, and let AI do the rest.</p>
             </div>
+
+            <button 
+                type="button"
+                onClick={handleCollaborate} 
+                className="absolute right-0 hidden md:flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/30 text-purple-600 border border-purple-200 dark:border-purple-700 shadow-sm rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors font-medium text-sm"
+            >
+                <Users size={18} /> Collaborate
+            </button> 
           </div>
 
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-colors">
@@ -266,7 +276,7 @@ const keepOriginal = () => {
                 </div>
               )}
 
-              {previewUrl && ( // Added image preview display
+              {previewUrl && ( 
                 <div className="relative mb-3 w-32 h-32">
                   <img src={previewUrl} alt="Reference" className="w-full h-full object-cover rounded-lg border border-gray-300 dark:border-gray-600" />
                   <button 
@@ -286,15 +296,15 @@ const keepOriginal = () => {
                 className="flex-1 w-full bg-transparent outline-none resize-none min-h-[120px] text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               />
               <button
-    type="button"
-    onClick={handleEnhancePrompt}
-    disabled={optimizing || !input.trim()}
-    className="mt-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg px-4 py-2"
->
-    {optimizing ? "Enhancing..." : "✨ Enhance Prompt"}
-</button>
+                type="button"
+                onClick={handleEnhancePrompt}
+                disabled={optimizing || !input.trim()}
+                className="mt-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg px-4 py-2"
+              >
+                {optimizing ? "Enhancing..." : "✨ Enhance Prompt"}
+              </button>
 
-              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700"> {/* Added file input trigger */}
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700"> 
                 <label className="cursor-pointer text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-2 w-max">
                   <ImageIcon size={16} /> Upload Style Reference (Optional)
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
@@ -304,44 +314,34 @@ const keepOriginal = () => {
 
             <div className="bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm flex flex-col relative focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 dark:focus-within:ring-blue-900/50 transition-all">
              <h3 className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-3 flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                    <Sparkles size={18} />
+                    AI Assistant
+                </span>
+                {optimizing && (
+                    <span className="text-xs font-medium text-blue-500 dark:text-blue-300 animate-pulse bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded-full">
+                        Optimizing...
+                    </span>
+                )}
+            </h3>
 
-    <span className="flex items-center gap-2">
-        <Sparkles size={18} />
-        AI Assistant
-    </span>
-
-    {optimizing && (
-        <span className="text-xs font-medium text-blue-500 dark:text-blue-300 animate-pulse bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded-full">
-            Optimizing...
-        </span>
-    )}
-
-</h3>
-{!enhancedPrompt ? (
-
-    <div className="flex flex-col justify-center items-center h-full text-center py-8">
-
-        <Sparkles className="text-blue-500 mb-3" size={32} />
-
-        <h4 className="font-semibold text-gray-800 dark:text-white">
-            No AI Suggestion Yet
-        </h4>
-
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            Type your prompt and click
-            <br />
-            <span className="font-semibold">
-                ✨ Enhance Prompt
-            </span>
-            to get an AI-improved version.
-        </p>
-
-    </div>
-
-) : (
-  <>
-              
-
+            {!enhancedPrompt ? (
+                <div className="flex flex-col justify-center items-center h-full text-center py-8">
+                    <Sparkles className="text-blue-500 mb-3" size={32} />
+                    <h4 className="font-semibold text-gray-800 dark:text-white">
+                        No AI Suggestion Yet
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                        Type your prompt and click
+                        <br />
+                        <span className="font-semibold">
+                            ✨ Enhance Prompt
+                        </span>
+                        to get an AI-improved version.
+                    </p>
+                </div>
+            ) : (
+              <>
               <textarea
                 disabled={loading || optimizing}
                 value={enhancedPrompt}
@@ -350,26 +350,23 @@ const keepOriginal = () => {
                 className="flex-1 w-full bg-transparent outline-none resize-none min-h-[120px] text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               />
               <div className="flex gap-3 mt-4">
+                <button
+                    type="button"
+                    onClick={useSuggestion}
+                    className="flex-1 bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700"
+                >
+                    Use Suggestion
+                </button>
 
-    <button
-        type="button"
-        onClick={useSuggestion}
-        className="flex-1 bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700"
-    >
-        Use Suggestion
-    </button>
-
-    <button
-        type="button"
-        onClick={keepOriginal}
-        className="flex-1 border border-gray-300 rounded-lg py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-    >
-        Keep Original
-    </button>
-
-</div>
-
-    
+                <button
+                    type="button"
+                    onClick={keepOriginal}
+                    className="flex-1 border border-gray-300 rounded-lg py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                    Keep Original
+                </button>
+              </div>
+              
               {enhancedPrompt && (
                  <div className="absolute bottom-6 right-6 flex gap-2">
                     <button type="button" onClick={keepOriginal} className="bg-white dark:bg-gray-800 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 border dark:border-gray-600 shadow-sm transition-colors" title="Restore Original">
@@ -381,17 +378,27 @@ const keepOriginal = () => {
                  </div>
               )}
               </>
-)}
+            )}
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={!input.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-all py-4 rounded-xl text-white font-semibold text-lg shadow-lg shadow-blue-600/30 flex justify-center items-center gap-2 mt-2"
-          >
-            <Sparkles size={20} /> Generate Masterpiece
-          </button>
+          <div className="flex gap-4 mt-2"> 
+              <button
+                type="submit"
+                disabled={!input.trim()}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-all py-4 rounded-xl text-white font-semibold text-lg shadow-lg shadow-blue-600/30 flex justify-center items-center gap-2"
+              >
+                <Sparkles size={20} /> Generate Masterpiece
+              </button>
+              
+              <button 
+                type="button"
+                onClick={handleCollaborate} 
+                className="md:hidden flex-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 py-4 rounded-xl font-semibold text-lg flex justify-center items-center gap-2 transition-colors"
+              >
+                <Users size={20} /> Collaborate
+              </button> 
+          </div>
 
         </form>
       )}
