@@ -12,7 +12,7 @@ const badWordsModule = require("bad-words");
 const FilterConstructor = badWordsModule.Filter || badWordsModule.default || badWordsModule;
 const customFilter = new FilterConstructor();
 
-customFilter.removeWords("shot", "shoot", "shooting"); // Removed false-positive words from bad-words dictionary
+customFilter.removeWords("shot", "shoot", "shooting");
 
 const blockedContentPatterns = [
     /\b(graphic\s+violence|violent\s+scene|explicit\s+violence)\b/i,
@@ -41,7 +41,7 @@ const isRestrictedPrompt = (prompt) => {
 const enhancePrompt = async (req, res) => {
   try {
     const { prompt } = req.body;
-        const file = req.file;
+    const file = req.file;
 
     if (!prompt) {
       return res.json({
@@ -50,10 +50,10 @@ const enhancePrompt = async (req, res) => {
       });
     }
 
-        if (isRestrictedPrompt(prompt)) {
+    if (isRestrictedPrompt(prompt)) {
       return res.json({
         success: false,
-                message: "Restricted language detected. Please remove profanity, violence, blood, or gore from the prompt.",
+        message: "Restricted language detected. Please remove profanity, violence, blood, or gore from the prompt.",
       });
     }
 
@@ -75,7 +75,7 @@ const enhancePrompt = async (req, res) => {
 const generateImage = async (req, res) => {
     try {
         const userId = String(req.userId);
-        const { prompt } = req.body;
+        const { prompt, roomId } = req.body;
         const file = req.file; 
         const user = await userModel.findById(userId);
 
@@ -102,12 +102,16 @@ const generateImage = async (req, res) => {
                 message: "Missing Clipdrop API key for image generation.",
             });
         }
-const finalPrompt = prompt;
+        
+        let finalPrompt = prompt;
+        if (file) {
+            finalPrompt = await optimizePrompt(prompt, file);
+        }
 
         const formData = new FormData();
         formData.append("prompt", finalPrompt);
 
-        const apiUrl = "https://clipdrop-api.co/text-to-image/v1"; // Fixed API URL to a valid Clipdrop endpoint
+        const apiUrl = "https://clipdrop-api.co/text-to-image/v1";
 
         const requestHeaders = {
             'x-api-key': clipdropApiKey,
@@ -125,7 +129,8 @@ const finalPrompt = prompt;
         await imageModel.create({
             userId,
             prompt: finalPrompt,
-            image: resultImage
+            image: resultImage,
+            roomId: roomId || null 
         });
 
         await userModel.findByIdAndUpdate(user._id, { creditBalance: user.creditBalance - 1 });
@@ -187,4 +192,14 @@ const deleteCreation = async (req, res) => {
     }
 };
 
-export { enhancePrompt, generateImage, getUserCreations, deleteCreation };
+const getRoomCreations = async (req, res) => {
+    try {
+        const { roomId } = req.params;
+        const images = await imageModel.find({ roomId }).sort({ createdAt: -1 });
+        res.json({ success: true, images });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export { enhancePrompt, generateImage, getUserCreations, deleteCreation, getRoomCreations };

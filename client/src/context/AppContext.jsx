@@ -70,12 +70,15 @@ const AppContextProvider = (props)=>{
          toast.error(error.message)
       }
      }, [backendUrl, token]);
-     const generateImage=async(prompt, referenceImage = null)=>{ // Added referenceImage parameter
+       const generateImage=async(prompt, referenceImage = null, roomId = null)=>{ // Added referenceImage parameter
       try{
        const formData = new FormData(); // Switched payload to FormData
        formData.append("prompt", prompt);
        if (referenceImage) {
          formData.append("referenceImage", referenceImage);
+       }
+          if (roomId) {
+         formData.append("roomId", roomId);
        }
 
        const {data}=await axios.post(backendUrl + '/api/image/generate-image', formData, { // Passed formData
@@ -102,7 +105,8 @@ const AppContextProvider = (props)=>{
 
       }
       catch(error){
-         toast.error(error.message)
+         const message = error.response?.data?.message || error.message || 'Failed to generate image';
+         toast.error(message)
          return null;
       }
      }

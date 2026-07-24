@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer"; // Added for image upload
 import {
   enhancePrompt,
-  generateImage, getUserCreations, deleteCreation,
+  generateImage, getUserCreations, deleteCreation, getRoomCreations,
 } from "../controllers/imageController.js";
 
 import userAuth from "../middleware/auth.js";
@@ -28,5 +28,6 @@ imageRouter.post(
 
 imageRouter.get('/creations', userAuth, getUserCreations); // New
 imageRouter.delete('/creations/:imageId', userAuth, deleteCreation); // New
+imageRouter.get('/room-creations/:roomId', userAuth, getRoomCreations);
 
 export default imageRouter;
